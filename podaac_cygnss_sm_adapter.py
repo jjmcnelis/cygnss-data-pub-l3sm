@@ -67,7 +67,8 @@ class Configuration:
             'coverage_content_type': "modelResult",
         },
         'SM_daily': {
-            'comment': "Daily soil moisture fractional volume content (cm3 cm-3)",
+            'comment': "units represent soil moisture content as a fractional volume (cm3 cm-3)",
+            'long_name': "mean soil moisture retrieval during the daily time periods for the grid cell",
             'units': "1",
             'coverage_content_type': "modelResult",
         },
@@ -112,9 +113,9 @@ class Configuration:
     }
 
     attributes = {
+        'source': None,
         'id': "PODAAC-CYGNS-L3SM1",
         'ShortName': "CYGNSS_L3_SOIL_MOISTURE_V1.0",
-        'source': None,
         'title': "UCAR/CU CYGNSS Level 3 Soil Moisture Product",
         'summary': "The UCAR/CU Cyclone Global Navigation Satellite System (CYGNSS) Level 3 Soil Moisture Product is an L-band bistatic radar dataset that provides estimates of 0-5 cm soil moisture at a 6-hour discretization for the majority of the extratropics. CYGNSS is a constellation of eight small satellites designed to observe ocean surface wind speed during hurricanes (PI Chris Ruf, University of Michigan); it is a NASA Earth Ventures Mission that was launched in December of 2016. These satellites employ a relatively new remote sensing technique called GNSS-Reflectometry (GNSS-R), which records L-band signals transmitted by navigation satellites that have reflected off of the Earth’s surface and back into space. Soil moisture estimates were produced by calculating the slope of the best-fit linear regression between SMAP soil moisture and CYGNSS 'effective reflectivity', which gives reflectivity corrected for antenna gain, range, and GPS transmit power.",
         'comment': "Dataset created by UCAR and CU Boulder",
@@ -122,6 +123,8 @@ class Configuration:
         'project': "CYGNSS",
         'institution': "COSMIC Data Analysis and Archive Center, Constellation Observing System for Meteorology, Ionosphere and Climate, University Corporation for Atmospheric Research (UCAR/COSMIC/CDAAC)",
         'references': "Chew, C.; Small, E. Description of the UCAR/CU Soil Moisture Product. Remote Sens. 2020, 12, 1558. https://doi.org/10.3390/rs12101558",
+        'keywords_vocabulary': "NASA Global Change Master Directory (GCMD) Science Keywords",
+        'keywords': "EARTH SCIENCE > LAND SURFACE > SOILS > SOIL MOISTURE/WATER CONTENT",
         'Conventions': "CF-1.6,ACDD-1.3",
         'license': "Freely Distributed",
         'version': None,
