@@ -2,16 +2,15 @@
 """
 # UCAR/CU CYGNSS Level 3 Soil Moisture Product (Chew & Small, 2020)
 #
-# This script demos one approach to applying PODAAC's recommended improvements 
-# to a netCDF file as it is efficiently duplicated from a source netCDF file
-# with a known structure/format.
-#
+# This script demos an approach for producing a revised version of a netCDF 
+# that conforms to a known structure using an efficient process that leverages
+# Unidata's excellent Python interface to the netCDF C library.
 #  
-# These core routines relies on netCDF and its dependencies only. All the
-# other imports are part of the Python 3 standard distribution. You can 
-# use pip or conda to install netCDF4 inside a virtual environment for 
-# best results. The `conda-forge` channel has a well managed source for 
-# netCDF4 if you're a conda user:
+# netCDF is and its dependencies are the only install requirements. The other 
+# imports come with the Python 3 standard distribution. Use pip or conda to 
+# install netCDF4 inside a virtual environment for best results. 
+# 
+# The `conda-forge` channel seems to provide a stable source for netCDF4:
 # 
 # ```shell
 # conda install -c conda-forge netCDF4
