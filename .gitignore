@@ -1,3 +1,4 @@
 .dev/
 *.nc
 index.html.tmp
+.DS_Store
