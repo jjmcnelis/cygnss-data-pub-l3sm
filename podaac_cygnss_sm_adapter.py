@@ -23,7 +23,7 @@ from subprocess import call
 from os.path import basename
 from datetime import datetime as dt
 from os.path import join, isfile, basename, dirname
-from netCDF4 import Dataset, date2num
+from netCDF4 import Dataset, date2num, numpy as np
 
 # Our preferred ISO datetime format:
 dtfmt = "%Y-%m-%dT%H:%M:%S"
@@ -58,7 +58,8 @@ class Configuration:
     the variables in the output file.
 
     """
-
+    vfill = -9999.
+    vfilled = ['SIGMA_daily', 'SM_daily', 'SM_subdaily', 'SIGMA_subdaily']
     variables = {
         'SIGMA_daily': {
             'comment': "units represent soil moisture content as a fractional volume (cm3 cm-3)",
@@ -201,7 +202,7 @@ class Configuration:
 
 
 
-def main(file: str):
+def main(file: str, fill=-9999.):
     
     # Initialize the Configuration class object with the input file.
     conf = Configuration(file)
@@ -225,18 +226,24 @@ def main(file: str):
         for n, d in source.dimensions.items():
             target.createDimension(n, len(d) if not d.isunlimited() else None)
 
-        # Loop over source dataset variables and create in the target dataset.
+        # Loop over source dataset variables and create in target dataset.
         for n, v in source.variables.items():
-            try:
-                fill = v._FillValue
-            except AttributeError as e:
-                fill = None
+
+            # Select the array of data for the variable. No fill by default.
+            data, fill = source.variables[n].__array__(), None
+            
+            # If configured, set fill value for variable and replace its NaNs.
+            if n in conf.vfilled:
+                fill = conf.vfill
+                data[data==np.nan] = fill
 
             # Create the currently iterated variable in the target dataset.
             x = target.createVariable(n, v.datatype, v.dimensions, fill_value=fill)
             
+            # Now replace NaNs in the source array with the fill value, if required.
+            
             # Copy variable array from the source to the target dataset.
-            target.variables[n][:] = source.variables[n][:]
+            target.variables[n][:] = data  #source.variables[n][:]
 
             # Assign the configured attributes to the output variable.
             target[n].setncatts(Configuration.variables[n])

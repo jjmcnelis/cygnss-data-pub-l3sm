@@ -34,7 +34,15 @@ find level3/ -type f -name "*.gz" -exec gunzip {} \;
 
 ## revisions
 
-To reprocess new netCDF outputs in a big batch, just execute the shell script [`batch.sh`](batch.sh) and wait.
+To execute the entire process described below, generating a new batch of nc files, execute the bash script [`batch.sh`](batch.sh) and wait a few minutes:
+
+```shell
+[cygnss-data-pub-l3sm:master] $ ./batch.sh 
+# [1/4] Grab the latest copies of the netCDF files from UCAR/COSMIC using 'wget'. 
+# [2/4] Decompress ALL downloaded gzipped netCDF files using the 'find' and 'tar' unix utils. 
+# [3/4] Call find and loop the found netCDFs, piping output to a log file. 
+# [4/4] Dump CDL headers for Clara's and Eric's reference. 
+```
 
 ### background
 
@@ -72,7 +80,7 @@ Check the generic format for the revised netCDFs in the `ncdump` output [here](d
 
 ### batch
 
-To conveniently generate new netCDF files for ALL of the originals, apply our script to the results returned by `find`, like before:
+Gen new netCDFs in a batch by applying script to the results of unix `find`:
 
 ```shell
 find level3/ -type f -name "ucar_cu_cygnss_sm_v*.nc" -exec ./podaac_cygnss_sm_adapter.py {} \;
