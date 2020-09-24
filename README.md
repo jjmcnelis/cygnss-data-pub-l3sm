@@ -119,5 +119,4 @@ The files all have `.cdl` extension, and they're located adjacent to the origina
 
 handbook: [docs/ucar_cu_sm_handbook.pdf](docs/ucar_cu_sm_handbook.pdf)
 
->Excerpt for my reference, maybe cite later:
 >"The value of the peak cross-correlation of each DDM (called `Pr,eff` in this document) is related to surface characteristics at the specular reflection point of the GNSS signal— including the roughness of the surface and the surface dielectric constant." (Section 1.5 CYGNSS Observables, *CYGNSS Soil Moisture Product User Handbook*)
