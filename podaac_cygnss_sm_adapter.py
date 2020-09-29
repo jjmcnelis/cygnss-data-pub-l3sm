@@ -115,7 +115,7 @@ class Configuration:
 
     attributes = {
         'source': None,
-        'id': "PODAAC-CYGNS-L3SM1",
+        'id': "PODAAC-CYGNU-L3SM1",
         'ShortName': "CYGNSS_L3_SOIL_MOISTURE_V1.0",
         'title': "UCAR/CU CYGNSS Level 3 Soil Moisture Product",
         'summary': "The UCAR/CU Cyclone Global Navigation Satellite System (CYGNSS) Level 3 Soil Moisture Product is an L-band bistatic radar dataset that provides estimates of 0-5 cm soil moisture at a 6-hour discretization for the majority of the extratropics. CYGNSS is a constellation of eight small satellites designed to observe ocean surface wind speed during hurricanes (PI Chris Ruf, University of Michigan); it is a NASA Earth Ventures Mission that was launched in December of 2016. These satellites employ a relatively new remote sensing technique called GNSS-Reflectometry (GNSS-R), which records L-band signals transmitted by navigation satellites that have reflected off of the Earth’s surface and back into space. Soil moisture estimates were produced by calculating the slope of the best-fit linear regression between SMAP soil moisture and CYGNSS 'effective reflectivity', which gives reflectivity corrected for antenna gain, range, and GPS transmit power.",
@@ -168,11 +168,9 @@ class Configuration:
 
         # Open the netCDF dataset in read mode.
         with Dataset(file, mode="r") as source:
-            
             # Grab arrays for the latitude and longitude variables in source.
             lat = source.variables['latitude'][:]
             lon = source.variables['longitude'][:]
-            
             # Grab some attributes from source dataset for manipulation.
             _hist = getattr(source, "History")
             _vers = getattr(source, "Version")
@@ -190,7 +188,7 @@ class Configuration:
         self.attributes.update({
             'source': basename(file),
             'version': float(_vers.replace("version ","")),
-            'history': f"{_hist}Modified for PODAAC release {tstamp}",
+            'history': f"{_hist}. Modified for PODAAC release {tstamp}.",
             'geospatial_lat_min': lat.min(),
             'geospatial_lat_max': lat.max(),
             'geospatial_lon_min': lon.min(),
@@ -212,13 +210,10 @@ def main(file: str, fill=-9999.):
 
         # Add a time dimension (length=unlimited/None):
         target.createDimension("time", size=None)
-
         # Add a time variable, which will be length=1 in this file:
         time = target.createVariable("time", "f4", ("time",))
-        
         # Assign the time variable's attributes from the config.
         time.setncatts(conf.variables['time'])
-        
         # Add one-item data array for time produced on `Configuration` init.
         time[:] = conf.timev
 
@@ -228,27 +223,25 @@ def main(file: str, fill=-9999.):
 
         # Loop over source dataset variables and create in target dataset.
         for n, v in source.variables.items():
-
             # Select the array of data for the variable. No fill by default.
-            data, fill = source.variables[n].__array__(), None
+            data, dims, fill = source.variables[n].__array__(), v.dimensions, None
             
             # If configured, set fill value for variable and replace its NaNs.
             if n in conf.vfilled:
                 fill = conf.vfill
                 data[data==np.nan] = fill
+            # If the variable ends with daily, add a dimensions.
+            if n.endswith("_daily"):
+                data = data[np.newaxis, ...]
+                dims = ('time', 'columns', 'rows')
 
             # Create the currently iterated variable in the target dataset.
-            x = target.createVariable(n, v.datatype, v.dimensions, fill_value=fill)
-            
-            # Now replace NaNs in the source array with the fill value, if required.
-            
+            x = target.createVariable(n, v.datatype, dims, fill_value=fill)
             # Copy variable array from the source to the target dataset.
-            target.variables[n][:] = data  #source.variables[n][:]
-
+            target.variables[n][:] = data
             # Assign the configured attributes to the output variable.
             target[n].setncatts(Configuration.variables[n])
 
-            # Sync staged updates to the output file (nc3 may req 'r+' mode)
             target.sync()
             
         # Now is a convenient time to rename lat/lon dims in target dataset.

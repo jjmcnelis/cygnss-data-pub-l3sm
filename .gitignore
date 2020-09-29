@@ -1,4 +1,6 @@
-.dev/
+*.log
 *.nc
 index.html.tmp
 .DS_Store
+.ipynb_checkpoints/
+.dev/

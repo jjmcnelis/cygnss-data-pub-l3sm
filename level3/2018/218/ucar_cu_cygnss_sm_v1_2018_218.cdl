@@ -1,0 +1,40 @@
+netcdf ucar_cu_cygnss_sm_v1_2018_218 {
+dimensions:
+	rows = 252 ;
+	columns = 802 ;
+	timeslices = 4 ;
+	startstop = 2 ;
+variables:
+	float latitude(columns, rows) ;
+		latitude:long_name = "latitude of the center of the grid cell" ;
+		latitude:units = "degrees" ;
+	float longitude(columns, rows) ;
+		longitude:long_name = "longitude of the center of the grid cell" ;
+		longitude:units = "degrees" ;
+	float timeintervals(startstop, timeslices) ;
+		timeintervals:long_name = "start and stop time for the sub-daily time periods" ;
+		timeintervals:units = "hours" ;
+	float SIGMA_daily(columns, rows) ;
+		SIGMA_daily:_FillValue = NaNf ;
+		SIGMA_daily:long_name = "standard deviation of soil moisture retrievals during the 24 hr period for the grid cell" ;
+		SIGMA_daily:units = "cm3 cm-3" ;
+	float SM_daily(columns, rows) ;
+		SM_daily:_FillValue = NaNf ;
+		SM_daily:long_name = "mean soil moisture retrieval during the 24 hr period for the grid cell" ;
+		SM_daily:units = "cm3 cm-3" ;
+	float SM_subdaily(timeslices, columns, rows) ;
+		SM_subdaily:_FillValue = NaNf ;
+		SM_subdaily:long_name = "mean soil moisture retrieval during the sub-daily time periods for the grid cell" ;
+		SM_subdaily:units = "cm3 cm-3" ;
+	float SIGMA_subdaily(timeslices, columns, rows) ;
+		SIGMA_subdaily:_FillValue = NaNf ;
+		SIGMA_subdaily:long_name = "standard deviation of soil moisture retrievals during the sub-daily time periods for the grid cell" ;
+		SIGMA_subdaily:units = "cm3 cm-3" ;
+
+// global attributes:
+		:Title = "CYGNSS soil moisture retrieval file" ;
+		:History = "Created 24-Apr-2019 10:49:12" ;
+		:Conventions = "CF-1.6" ;
+		:Version = "version 1.0" ;
+		:Description = "Dataset created by UCAR and CU Boulder" ;
+}

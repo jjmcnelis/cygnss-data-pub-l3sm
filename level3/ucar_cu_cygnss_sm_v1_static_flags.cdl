@@ -1,0 +1,34 @@
+netcdf ucar_cu_cygnss_sm_v1_static_flags {
+dimensions:
+	rows = 252 ;
+	columns = 802 ;
+variables:
+	float latitude(columns, rows) ;
+		latitude:long_name = "latitude of the center of the grid cell" ;
+		latitude:units = "degrees" ;
+	float longitude(columns, rows) ;
+		longitude:long_name = "longitude of the center of the grid cell" ;
+		longitude:units = "degrees" ;
+	ubyte flag_small_SM_range(columns, rows) ;
+		flag_small_SM_range:_FillValue = 0UB ;
+		flag_small_SM_range:long_name = "value of 1 indicates that Beta was calculated using a small range of soil moisture values (<0.1 cm3 cm-3)" ;
+	ubyte flag_poor_SMAP(columns, rows) ;
+		flag_poor_SMAP:_FillValue = 0UB ;
+		flag_poor_SMAP:long_name = "value of 1 indicates that Beta was calculated using a majority of SMAP data flagged as not recommended for retrieval (>90%)" ;
+	ubyte flag_high_ubrmsd(columns, rows) ;
+		flag_high_ubrmsd:_FillValue = 0UB ;
+		flag_high_ubrmsd:long_name = "value of 1 indicates that a high ubRMSD results when comparing SMAP and CYGNSS soil moisture (>0.08 cm3 cm-3)" ;
+	ubyte flag_few_obs(columns, rows) ;
+		flag_few_obs:_FillValue = 0UB ;
+		flag_few_obs:long_name = "value of 1 indicates that Beta was calculated with relatively few CYGNSS observations (<100)" ;
+	ubyte flag_low_signal(columns, rows) ;
+		flag_low_signal:_FillValue = 0UB ;
+		flag_low_signal:long_name = "value of 1 indicates that CYGNSS SNR for the grid cell tends to be low (<5 dB)" ;
+
+// global attributes:
+		:Title = "CYGNSS static quality flag file" ;
+		:History = "Created 26-Apr-2019 13:54:01" ;
+		:Conventions = "CF-1.6" ;
+		:Version = "version 1.0" ;
+		:Description = "Dataset created by UCAR and CU Boulder" ;
+}
