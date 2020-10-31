@@ -1,6 +1,11 @@
 *.log
 *.nc
-index.html.tmp
+*.tif
+*.tif.aux.xml
+*/.DS_Store
 .DS_Store
+index.html.tmp
 .ipynb_checkpoints/
 .dev/
+.backup/
+docs/cygnss_l3_sm_revised.zip

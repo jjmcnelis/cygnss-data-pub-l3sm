@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-# UCAR/CU CYGNSS Level 3 Soil Moisture Product (Chew & Small, 2020)
+# CYGNSS Level 3 Soil Moisture from UCAR/CU 
+# Chew and Small, 2020
 #
 # This script demos an approach for producing a revised version of a netCDF 
 # that conforms to a known structure using an efficient process that leverages
@@ -21,7 +22,7 @@ from sys import argv
 from shutil import move
 from subprocess import call
 from os.path import basename
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 from os.path import join, isfile, basename, dirname
 from netCDF4 import Dataset, date2num, numpy as np
 
@@ -59,30 +60,34 @@ class Configuration:
 
     """
     vfill = -9999.
-    vfilled = ['SIGMA_daily', 'SM_daily', 'SM_subdaily', 'SIGMA_subdaily']
+    vfilled = ['timeintervals', 'SIGMA_daily', 'SM_daily', 'SM_subdaily', 'SIGMA_subdaily']
     variables = {
         'SIGMA_daily': {
             'comment': "units represent soil moisture content as a fractional volume (cm3 cm-3)",
             'long_name': "standard deviation of soil moisture retrievals during the 24 hr period for the grid cell",
             'units': "1",
+            #'coordinates': "longitude latitude",
             'coverage_content_type': "modelResult",
         },
         'SM_daily': {
             'comment': "units represent soil moisture content as a fractional volume (cm3 cm-3)",
             'long_name': "mean soil moisture retrieval during the daily time periods for the grid cell",
             'units': "1",
+            #'coordinates': "longitude latitude",
             'coverage_content_type': "modelResult",
         },
         'SM_subdaily': {
             'comment': "units represent soil moisture content as a fractional volume (cm3 cm-3)",
             'long_name': "mean soil moisture retrieval during the sub-daily time periods for the grid cell",
             'units': "1",
+            #'coordinates': "longitude latitude",
             'coverage_content_type': "modelResult",
         },
         'SIGMA_subdaily': {
             'comment': "units represent soil moisture content as a fractional volume (cm3 cm-3)",
             'long_name': "standard deviation of soil moisture retrievals during the sub-daily time periods for the grid cell",
             'units': "1",
+            #'coordinates': "longitude latitude",
             'coverage_content_type': "modelResult",
         },
         'latitude': {
@@ -102,9 +107,9 @@ class Configuration:
         'time': {
             'standard_name': "time",
             'long_name': "time",
-            'axis': "T",
+            #'axis': "T",
             'units': "days since 1970-01-01 00:00:00 UTC",
-            'coverage_content_type': "coordinate",
+            'coverage_content_type': "referenceInformation",
         },
         'timeintervals': {
             'long_name': "start and stop time for the sub-daily time periods",
@@ -117,8 +122,8 @@ class Configuration:
         'source': None,
         'id': "PODAAC-CYGNU-L3SM1",
         'ShortName': "CYGNSS_L3_SOIL_MOISTURE_V1.0",
-        'title': "UCAR/CU CYGNSS Level 3 Soil Moisture Product",
-        'summary': "The UCAR/CU Cyclone Global Navigation Satellite System (CYGNSS) Level 3 Soil Moisture Product is an L-band bistatic radar dataset that provides estimates of 0-5 cm soil moisture at a 6-hour discretization for the majority of the extratropics. CYGNSS is a constellation of eight small satellites designed to observe ocean surface wind speed during hurricanes (PI Chris Ruf, University of Michigan); it is a NASA Earth Ventures Mission that was launched in December of 2016. These satellites employ a relatively new remote sensing technique called GNSS-Reflectometry (GNSS-R), which records L-band signals transmitted by navigation satellites that have reflected off of the Earth’s surface and back into space. Soil moisture estimates were produced by calculating the slope of the best-fit linear regression between SMAP soil moisture and CYGNSS 'effective reflectivity', which gives reflectivity corrected for antenna gain, range, and GPS transmit power.",
+        'title': "CYGNSS Level 3 Soil Moisture from UCAR/CU",
+        'summary': "The CYGNSS Level 3 Soil Moisture Product provides volumetric water content estimates for soils between 0-5 cm depth at a 6-hour discretization for most of the subtropics. The data were produced by CYGNSS investigators at the University Corporation for Atmospheric Research (UCAR) and the University Colorado at Boulder (CU), and derive from version 2.1 of the CYGNSS L1 SDR. The soil moisture algorithm uses collocated soil moisture retrievals from SMAP to calibrate CYGNSS observations from the same day. For a given location, a linear relationship between the SMAP soil moisture and CYGNSS reflectivity is determined and used to transform the CYGNSS observations into soil moisture. The data are archived in daily files in netCDF-4 format. Two soil moisture variables report the volumetric water content in units of cm3/cm3. The variable SM_subdaily includes up to four soil moisture estimates per day. Another variable SM_daily provides a daily average. The time series covers the period from March 2017 to August 2020.",
         'comment': "Dataset created by UCAR and CU Boulder",
         'program': "CYGNSS",
         'project': "CYGNSS",
@@ -162,8 +167,11 @@ class Configuration:
         # Outputs will be written to adjacent files and prefixed with "_".
         self.output = join(dirname(file), f"_{basename(file)}")
 
-        # Determine an epoch time for the time variable based on the filename.
+        # Get the file's creation timestamp as a Python datetime.        
         self.timed = dt.strptime(basename(file)[-11:-3], "%Y_%j")
+        # Add twelve hours to the time to shift to middle of the day.
+        self.timed = self.timed + timedelta(hours=12)
+        # Determine an epoch time for the time variable based on the filename.
         self.timev = [date2num(self.timed, self.variables['time']['units'])]
 
         # Open the netCDF dataset in read mode.
@@ -209,13 +217,13 @@ def main(file: str, fill=-9999.):
     with Dataset(file, "r") as source, Dataset(conf.output, "w") as target:
 
         # Add a time dimension (length=unlimited/None):
-        target.createDimension("time", size=None)
+        target.createDimension("time", size=1)
         # Add a time variable, which will be length=1 in this file:
         time = target.createVariable("time", "f4", ("time",))
         # Assign the time variable's attributes from the config.
         time.setncatts(conf.variables['time'])
         # Add one-item data array for time produced on `Configuration` init.
-        time[:] = conf.timev
+        time[:] = [conf.timev]
 
         # Loop over source dataset's dimensions, add them to the target dataset.
         for n, d in source.dimensions.items():
@@ -223,6 +231,7 @@ def main(file: str, fill=-9999.):
 
         # Loop over source dataset variables and create in target dataset.
         for n, v in source.variables.items():
+            print(n)
             # Select the array of data for the variable. No fill by default.
             data, dims, fill = source.variables[n].__array__(), v.dimensions, None
             
@@ -230,10 +239,19 @@ def main(file: str, fill=-9999.):
             if n in conf.vfilled:
                 fill = conf.vfill
                 data[data==np.nan] = fill
-            # If the variable ends with daily, add a dimensions.
-            if n.endswith("_daily"):
-                data = data[np.newaxis, ...]
-                dims = ('time', 'columns', 'rows')
+
+            # If var is lat or lon, rotate by 2d method; if data, by 3d method.
+            if n in ['latitude', 'longitude']:
+                data = np.rot90(data, k=1)
+                dims = ('rows', 'columns')
+            elif not n.startswith("time"):
+                if n.endswith("_subdaily"):
+                    data = np.rot90(data, k=1, axes=(1,2,))
+                    dims = ('timeslices', 'rows', 'columns')
+                elif n.endswith("_daily"):
+                    data = np.rot90(data, k=1)
+                    data = data[np.newaxis, ...]
+                    dims = ('time', 'rows', 'columns')
 
             # Create the currently iterated variable in the target dataset.
             x = target.createVariable(n, v.datatype, dims, fill_value=fill)
