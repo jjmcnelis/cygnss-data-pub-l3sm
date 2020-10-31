@@ -231,7 +231,6 @@ def main(file: str, fill=-9999.):
 
         # Loop over source dataset variables and create in target dataset.
         for n, v in source.variables.items():
-            print(n)
             # Select the array of data for the variable. No fill by default.
             data, dims, fill = source.variables[n].__array__(), v.dimensions, None
             
